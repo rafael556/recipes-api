@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { UtilsService } from '../utils/utils.service';
-import { CreateRecipeDto } from './createRecipe.dto';
+import { UtilsService } from '../../utils/utils.service';
+import { CreateRecipeDto } from '../dtos/createRecipe.dto';
 import { Recipe } from './recipes.model';
 
 @Injectable()
@@ -15,7 +15,6 @@ export class RecipeFactory {
     recipe.prepareTime = dto.prepareTime;
     recipe.portionsNumber = dto.portionsNumber;
     recipe.difficulty = dto.difficulty;
-    recipe.categories = dto.categories;
 
     recipe.recipeId = this.utils.generateUUID();
     recipe.creationDate = new Date().toISOString();

@@ -6,6 +6,8 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { UtilsModule } from './utils/utils.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Recipe } from './recipes/model/recipes.model';
 
 @Module({
   imports: [
@@ -15,6 +17,18 @@ import { UtilsModule } from './utils/utils.module';
     }),
     RecipesModule,
     UtilsModule,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'password',
+      database: 'recipe',
+      entities: [Recipe],
+      synchronize: true,
+      retryAttempts: 10,
+      retryDelay: 3000,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

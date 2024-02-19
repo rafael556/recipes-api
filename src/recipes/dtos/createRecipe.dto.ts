@@ -1,6 +1,5 @@
 import { IsArray, IsNumber, IsString, IsUUID, Min } from 'class-validator';
-import { Recipe } from './recipes.model';
-import { plainToInstance } from 'class-transformer';
+import { Recipe } from '../model/recipes.model';
 
 export class CreateRecipeDto implements Partial<Recipe> {
   @IsString()
@@ -22,7 +21,4 @@ export class CreateRecipeDto implements Partial<Recipe> {
 
   @IsNumber()
   difficulty: number;
-
-  @IsArray()
-  categories: string[];
 }
