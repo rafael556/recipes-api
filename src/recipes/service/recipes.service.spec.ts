@@ -22,27 +22,9 @@ describe('RecipesService', () => {
     difficulty: 4,
   };
 
-  const validRecipe: Recipe = new Recipe({
-    title: 'test',
-    description: 'test',
-    instructions: 'test',
-    prepareTime: 2,
-    portionsNumber: 0,
-    difficulty: 4,
-    recipeId: '123456',
-    isActive: true,
-  });
+  let validRecipe: Recipe = null;
 
-  const validRecipeDto: RecipeDto = {
-    title: 'test',
-    description: 'test',
-    instructions: 'test',
-    prepareTime: 2,
-    portionsNumber: 0,
-    difficulty: 4,
-    recipeId: '123456',
-    isActive: true,
-  };
+  let validRecipeDto: RecipeDto = null;
 
   beforeEach(async () => {
     recipeFactoryMock = {
@@ -55,6 +37,28 @@ describe('RecipesService', () => {
       find: jest.fn().mockReturnValue([validRecipe, validRecipe]),
       update: jest.fn().mockReturnValue(validRecipe),
     } as unknown as jest.Mocked<Repository<Recipe>>;
+
+    validRecipe = new Recipe({
+      title: 'test',
+      description: 'test',
+      instructions: 'test',
+      prepareTime: 2,
+      portionsNumber: 0,
+      difficulty: 4,
+      recipeId: '123456',
+      isActive: true,
+    });
+
+    validRecipeDto = {
+      title: 'test',
+      description: 'test',
+      instructions: 'test',
+      prepareTime: 2,
+      portionsNumber: 0,
+      difficulty: 4,
+      recipeId: '123456',
+      isActive: true,
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -75,6 +79,7 @@ describe('RecipesService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('should be defined', () => {
@@ -149,7 +154,83 @@ describe('RecipesService', () => {
     });
   });
 
-  describe('update', () => {});
+  describe('update', () => {
+    it('should find a recipe to be updated', async () => {
+      const recipeId = '123456';
+      const updateRecipeDto = {
+        title: 'test',
+        description: 'test',
+        instructions: 'test',
+        prepareTime: 2,
+        portionsNumber: 0,
+        difficulty: 4,
+        isActive: true,
+      };
+      await service.update(recipeId, updateRecipeDto);
+
+      expect(mockRepository.findOneBy).toHaveBeenCalledWith({recipeId});
+      expect(mockRepository.findOneBy).toHaveReturnedWith(validRecipe);
+    })
+
+    it('should throw if not recipe found', async () => {
+      const recipeId = '123456';
+      const updateRecipeDto = {
+        title: 'test',
+        description: 'test',
+        instructions: 'test',
+        prepareTime: 2,
+        portionsNumber: 0,
+        difficulty: 4,
+        isActive: true,
+      };
+
+      mockRepository.findOneBy.mockResolvedValue(null);
+      await expect(service.update(recipeId, updateRecipeDto)).rejects.toThrow(BadRequestException);
+    })
+
+    it('should save in database', async () => {
+      const recipeId = '123456';
+      const updateRecipeDto = {
+        title: 'test update',
+        description: 'test',
+        instructions: 'test',
+        prepareTime: 2,
+        portionsNumber: 0,
+        difficulty: 4,
+        isActive: true,
+      };
+
+      const newRecipeToUpdate = Object.assign({}, validRecipe);
+      newRecipeToUpdate.title = 'test update';
+
+      await service.update(recipeId, updateRecipeDto)
+
+      expect(mockRepository.save).toHaveBeenCalledWith(newRecipeToUpdate);
+    })
+
+    it('should return a recipeDto updated', async () => {
+      const recipeId = '123456';
+      const updateRecipeDto = {
+        title: 'test update',
+        description: 'test',
+        instructions: 'test',
+        prepareTime: 2,
+        portionsNumber: 0,
+        difficulty: 4,
+        isActive: true,
+      };
+
+      const newRecipeToUpdateDto = Object.assign({}, validRecipeDto);
+      newRecipeToUpdateDto.title = 'test update';
+
+      const newRecipeToUpdate = Object.assign({}, validRecipe);
+      newRecipeToUpdate.title = 'test update';
+
+      mockRepository.save.mockResolvedValue(newRecipeToUpdate);
+
+      expect(await service.update(recipeId, updateRecipeDto)).toEqual(newRecipeToUpdateDto)
+    })
+  });
 
   describe('activate', () => {
     it('should call find one by', async () => {
@@ -223,6 +304,7 @@ describe('RecipesService', () => {
       const invalidRecipeDto = Object.assign({}, validRecipeDto);
       invalidRecipeDto.isActive = false;
 
+      mockRepository.save = jest.fn().mockResolvedValue(inactiveRecipe);
       const result = await service.deactivate(entryId);
 
       expect(mockRepository.save).toHaveBeenCalled();
@@ -232,10 +314,10 @@ describe('RecipesService', () => {
 
     it('should not call save when recipe is inactive', async () => {
       const entryId = '123456';
-      const inactiveRecipe = validRecipe;
+      const inactiveRecipe = Object.assign({}, validRecipe);
       inactiveRecipe.isActive = false;
 
-      const invalidRecipeDto = validRecipeDto;
+      const invalidRecipeDto = Object.assign({}, validRecipeDto);
       invalidRecipeDto.isActive = false;
 
       mockRepository.findOneBy.mockResolvedValue(inactiveRecipe);
@@ -248,6 +330,6 @@ describe('RecipesService', () => {
   });
 
   describe('remove', () => {
-    
+
   });
 });
